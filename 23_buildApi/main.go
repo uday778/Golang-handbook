@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -15,7 +16,7 @@ import (
 
 type Course struct {
 	CourseId    string  `json:"courseid"`
-	CourseName  string  `json:"corsename"`
+	CourseName  string  `json:"coursename"`
 	CoursePrice int     `json:"price"`
 	Author      *Author `json:"author"`
 }
@@ -35,6 +36,37 @@ func(c *Course) IsEmpty() bool {
 	return  c.CourseName ==""
 }
 
+func main()  {
+	fmt.Println("API-Learncodeonline.in")
+	r:= mux.NewRouter()
+
+	//seeding
+
+	courses= append(courses, Course{CourseId: "2",CourseName: "React js",CoursePrice: 299, Author: &Author{Fullname: "uday kumar",Website: "lco.dev"}})
+
+	courses= append(courses, Course{CourseId: "3",CourseName: "next js", CoursePrice: 399, Author: &Author{Fullname: "rishi",Website: "lco.dev"}})
+
+	courses= append(courses, Course{CourseId: "4",CourseName: "express",CoursePrice: 499, Author: &Author{Fullname: "snake",Website: "go.dev"}})
+
+
+
+	//routing
+
+	r.HandleFunc("/",serveHome).Methods("GET")
+	r.HandleFunc("/courses",getAllCourses).Methods("GET")
+	r.HandleFunc("/course/{id}",getOneCourse).Methods("GET")
+	r.HandleFunc("/course",createOneCourse).Methods("POST")
+	r.HandleFunc("/course/{id}",updateOneCourse).Methods("PUT")
+	r.HandleFunc("/course/{id}",deleteOneCourse).Methods("DELETE")
+
+
+
+	//listen to aport
+	log.Fatal(http.ListenAndServe(":4000",r))
+
+
+
+}
 
 
 
@@ -67,7 +99,7 @@ func getOneCourse(w http.ResponseWriter,r *http.Request)  {
 		}
 	}
 	json.NewEncoder(w).Encode("No Course found with given id")
-	return
+	
 
 }
 
@@ -84,6 +116,11 @@ func createOneCourse(w http.ResponseWriter, r * http.Request)  {
 	if course.IsEmpty(){
 		json.NewEncoder(w).Encode("No data inside JSON")
 	}
+
+	//todo : check only if title is duplicate
+	//loop, title matched with course.coursename, JSON
+
+
 	//generate unique id, string
 	//append new course into courses
 
@@ -97,32 +134,32 @@ func createOneCourse(w http.ResponseWriter, r * http.Request)  {
 
 }
 
-
-func updateOneCourse(w http.ResponseWriter,r *http.Request)  {
-	fmt.Println("Create One Course")
+func updateOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Update one course")
 	w.Header().Set("Content-Type", "application/json")
 
-	//first - grab id rom req
-
+	// First - grab id from request
 	params := mux.Vars(r)
 
-	//loop, get id, remove opration, add with my ID 
-
-	for index, course:= range courses{
-		if course.CourseId==params["id"]{
-			courses=append(courses[:index],courses[index+1:]...  )
-			var course Course
-			_ = json.NewDecoder(r.Body).Decode(&course)
-			course.CourseId=params["id"]
-			courses=append(courses, course)
-			json.NewEncoder(w).Encode(course)
-			return 
-
+	// Loop, find ID, remove, add with updated data
+	for index, course := range courses {
+		if course.CourseId == params["id"] {
+			courses = append(courses[:index], courses[index+1:]...)
+			var updatedCourse Course
+			err := json.NewDecoder(r.Body).Decode(&updatedCourse)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			updatedCourse.CourseId = params["id"]
+			courses = append(courses, updatedCourse)
+			json.NewEncoder(w).Encode(updatedCourse)
+			return
 		}
 	}
-	//TODO : semd a response whwn id is not found
-	json.NewEncoder(w).Encode("No Course found with given id")
-	return
+
+	// Send response when ID is not found
+	http.Error(w, "Course not found", http.StatusNotFound)
 }
 
 func deleteOneCourse(w http.ResponseWriter,r *http.Request)  {
@@ -135,7 +172,9 @@ func deleteOneCourse(w http.ResponseWriter,r *http.Request)  {
 	for index,course:= range courses{
 		if course.CourseId ==params["id"] {
 			courses=append(courses[:index],courses[index+1:]...)
+			// todo : send a confirm or demy response 
 			break
 		}
 	}
+	
 }
