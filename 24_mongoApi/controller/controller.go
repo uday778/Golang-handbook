@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const connectionString = "mongodb+srv://udaysiddu492:V2Tp9ObrfHXtkt3P@cluster0.hohpwil.mongodb.net/netflix"
+const connectionString = "mongodb+srv://udaysiddu492:uday-kumar@cluster0.hohpwil.mongodb.net/netflix"
 
 const dbName = "netflix"
 const colName = "watchlist"
@@ -46,12 +46,13 @@ func init()  {
 
 //insert 1 record to mongodb
 
-func insertOneMovie(movie model.Netflix)  {
-	inserted,err:=collection.InsertOne(context.Background(),movie)
+func insertOneMovie(movie model.Netflix) {
+	inserted, err := collection.InsertOne(context.Background(), movie)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Inserted 1 movie in Db with id :",inserted.InsertedID)
+	fmt.Println("Inserted 1 movie in db with id: ", inserted.InsertedID)
 }
 
 //update 1 record 
@@ -119,13 +120,12 @@ func GetMyAllMovies(w http.ResponseWriter,r *http.Request)  {
 	json.NewEncoder(w).Encode(allMovies)
 }
 
-func  CreateMovie(w http.ResponseWriter, r *http.Request)  {
-	w.Header().Set("Content-Type","application/x-www-form-urlencode")
-	w.Header().Set("Allow-Control-Allow-Methods","POST")
+func CreateMovie(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 
 	var movie model.Netflix
-
-	json.NewDecoder(r.Body).Decode(&movie)
+	_ = json.NewDecoder(r.Body).Decode(&movie)
 	insertOneMovie(movie)
 	json.NewEncoder(w).Encode(movie)
 
@@ -154,3 +154,4 @@ func DeleteAllMovies(w http.ResponseWriter,r *http.Request)  {
 	count := deleteAllMovie()
 	json.NewEncoder(w).Encode(count)
 }
+
