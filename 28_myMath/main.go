@@ -1,9 +1,9 @@
 package main
 
 import (
-	"crypto"
+	
 	"fmt"
-	"math/big"
+	
 	"math/rand"
 
 	// "math/rand"
@@ -19,9 +19,9 @@ func main() {
 	// fmt.Println("the sum is :",mynum + int(mynum2))// we loose precision
 
 
-	//random numbers 
-	//  rand.New(rand.NewSource(time.Now().UnixNano()))
-	// fmt.Println(rand.Intn(5)+1)
+	// random numbers 
+	 rand.New(rand.NewSource(time.Now().UnixNano()))
+	fmt.Println(rand.Intn(5)+1)
 
 
 
